@@ -1,0 +1,11 @@
+[Unit]
+Description=Discord Masari Bot
+
+[Service]
+WorkingDirectory=/home/pooldaemon/masari-bot
+ExecStart=/usr/bin/python3 bot.py
+Restart=always
+User=pooldaemon
+
+[Install]
+WantedBy=multi-user.target
