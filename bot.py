@@ -20,6 +20,7 @@ bot = commands.Bot(command_prefix=prefix)
 apiUrl = config.apiURL
 blockTargetTime = config.blockTargetTime
 coinCode = config.coinCode
+welcomeChannel = config.welcomeChannel
 
 def prettyTimeDelta(seconds):
   seconds = int(seconds)
@@ -34,8 +35,6 @@ def prettyTimeDelta(seconds):
       return '%dm %ds' % (minutes, seconds)
   else:
       return '%ds' % (seconds,)
-
-
 
 def getReadableHashRateString(hashrate):
 	i = 0
@@ -151,6 +150,22 @@ async def on_ready():
 	print('Logged in as')
 	print(bot.user.name)
 	print(bot.user.id)
+
+newUserMessage = """Hey there! Welcome to the Masari Discord Server!
+A few things to get you started:
+Frequently Asked Questions are found at #faq
+Masari resources (client, pools, etc) can be found at #resources
+If you need any help, check out #support or #mining
+See ya around!
+"""
+
+@bot.event
+async def on_member_join(member):
+	foundChannel = discord.utils.find(lambda m: str(m.id) == str(config.welcomeChannel), bot.get_all_channels())
+	welcomeMessage = "Welcome " + member.name + "! Stay a while"
+	await bot.send_message(foundChannel, welcomeMessage)
+	await bot.send_message(member, newUserMessage)
+	print("Sent message to " + member.name)
 
 try:
   bot.run(config.discordtoken)

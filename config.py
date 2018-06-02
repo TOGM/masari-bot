@@ -6,6 +6,7 @@ config.read('config.ini')
 
 discordtoken = config['SETTINGS']['discordtoken'].strip()
 server = config['SETTINGS']['server'].strip()
+welcomeChannel = config['SETTINGS']['welcomeChannel'].strip()
 apiURL = config['SETTINGS']['apiURL'].strip()
 blockTargetTime = config['SETTINGS']['blockTargetTime'].strip()
 coinCode = config['SETTINGS']['coinCode'].strip()
