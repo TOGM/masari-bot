@@ -6,5 +6,5 @@ cd ~
 git clone https://github.com/togm/masari-bot.git masaribot
 sudo cp -a ~/poolbot/deployment/masaribot.service /lib/systemd/system
 sudo systemctl daemon-reload
-sudo systemctl enable poolbot
-sudo systemctl start poolbot
+sudo systemctl enable masaribot
+sudo systemctl start masaribot
