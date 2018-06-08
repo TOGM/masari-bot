@@ -21,6 +21,7 @@ apiUrl = config.apiURL
 blockTargetTime = config.blockTargetTime
 coinCode = config.coinCode
 welcomeChannel = config.welcomeChannel
+hourly = 3600
 
 def prettyTimeDelta(seconds):
   seconds = int(seconds)
@@ -44,11 +45,9 @@ def getReadableHashRateString(hashrate):
 		i += 1
 	
 	return str("{:.2f}".format(hashrate) + byteUnits[i])
-		
 
-@bot.command(pass_context=True, brief="Market Data from CMC", name='market')
-async def market_CMD(ctx):
-	embed=discord.Embed(title="CoinMarketCap", description="Market Data for Masari",color=0xffd700, url="https://coinmarketcap.com/currencies/masari/")
+def getMarketInfo():
+	embed=discord.Embed(title="CoinMarketCap", description="Market Data for Masari",color=0x0000ff, url="https://coinmarketcap.com/currencies/masari/")
 	embed.set_thumbnail(url="https://pbs.twimg.com/profile_images/991282814518743040/OEj1fTFp_400x400.jpg")
 	
 	CMC = requests.get("https://api.coinmarketcap.com/v2/ticker/2674").json()
@@ -65,10 +64,9 @@ async def market_CMD(ctx):
 	embed.add_field(name="1HR "+u'Δ'+"%", value=percentChange1H, inline=True)
 	embed.add_field(name="24HR "+u'Δ'+"%", value=percentChange24H, inline=True)
 	embed.set_footer(text="This was last updated "+str(lastupdated)) 
-	await bot.say(embed=embed)
+	return embed
 
-@bot.command(pass_context=True, brief="Current price of MSR by exchange", name='price')
-async def price_CMD(ctx):
+def getExchangeInfo():
 	embed=discord.Embed(title="Prices", color=0xffd700)
 	embed.set_thumbnail(url="https://get.masaricoin.com/assets/msr_goldcoin.png")
 	
@@ -81,7 +79,6 @@ async def price_CMD(ctx):
 		
 	embed.add_field(name="SouthXchange", value="BTC: "+str(BTC_MSR_sx), inline=True)
 	
-
 	#Stocks.Exchange
 	try:
 		stocksExchange = requests.get("https://stocks.exchange/api2/ticker").json()
@@ -117,21 +114,51 @@ async def price_CMD(ctx):
 		BTC_MSR_altex = ' n/a '
 	
 	embed.add_field(name="Altex.Exchange", value="BTC: "+str(BTC_MSR_altex), inline=True)
+	return embed
 
-	await bot.say(embed=embed)
-
-@bot.command(pass_context=True, brief="Network Stats", name='network')
-async def network_CMD(ctx):
+def getNetworkInfo():
 	embed=discord.Embed(title="Network Statistics", color=0x40b862)
 	embed.set_thumbnail(url="https://getmasari.org/images/Masari-Logo.png")
 	networkStats = requests.get(apiUrl + "network/stats").json()
 	networkHeight = networkStats["height"]
 	networkDifficulty = networkStats["difficulty"]
 	networkHashrate = getReadableHashRateString(int(networkStats["difficulty"])/ int(blockTargetTime))
-
 	embed.add_field(name="Hashrate",value=str(networkHashrate), inline=True)
 	embed.add_field(name="Difficulty",value=str(networkDifficulty), inline=True)
 	embed.add_field(name="Last Block",value=str(networkHeight), inline=True)
+	return embed
+
+async def hourlyUpdate():
+	await bot.wait_until_ready()
+	while not bot.is_closed:
+		if config.exchangeChannel is not "":
+			exchangeChannel = discord.utils.find(lambda m: str(m.id) == str(config.exchangeChannel), bot.get_all_channels())
+			exchangeEmbed = getExchangeInfo()
+			await bot.send_message(exchangeChannel,embed=exchangeEmbed)
+		if config.marketChannel is not "":
+			marketChannel = discord.utils.find(lambda m: str(m.id) == str(config.marketChannel), bot.get_all_channels())
+			marketEmbed = getMarketInfo()
+			await bot.send_message(marketChannel,embed=marketEmbed)
+		if config.networkChannel is not "":
+			networkChannel = discord.utils.find(lambda m: str(m.id) == str(config.networkChannel), bot.get_all_channels())
+			networkEmbed = getNetworkInfo()
+			await bot.send_message(networkChannel,embed=networkEmbed)
+		await asyncio.sleep(hourly)
+	
+@bot.command(pass_context=True, brief="Market Data from CMC", name='market')
+async def market_CMD(ctx):
+	embed = getMarketInfo()
+	await bot.say(embed=embed)
+	
+
+@bot.command(pass_context=True, brief="Current price of MSR by exchange", name='price')
+async def price_CMD(ctx):
+	embed = getExchangeInfo()
+	await bot.say(embed=embed)
+
+@bot.command(pass_context=True, brief="Network Stats", name='network')
+async def network_CMD(ctx):
+	
 	await bot.say(embed=embed)
 
 @bot.command(pass_context=True, brief="Testcommand", name='test', hidden=True)
@@ -150,6 +177,7 @@ async def on_ready():
 	print('Logged in as')
 	print(bot.user.name)
 	print(bot.user.id)
+	bot.loop.create_task(hourlyUpdate())
 
 newUserMessage = """Hey there! Welcome to the Masari Discord Server!
 A few things to get you started:
@@ -162,7 +190,7 @@ See ya around!
 @bot.event
 async def on_member_join(member):
 	foundChannel = discord.utils.find(lambda m: str(m.id) == str(config.welcomeChannel), bot.get_all_channels())
-	welcomeMessage = "Welcome " + member.name + "! Stay a while"
+	welcomeMessage = "Welcome @" + member.name + "! What brings you to Masari?"
 	await bot.send_message(foundChannel, welcomeMessage)
 	await bot.send_message(member, newUserMessage)
 	print("Sent message to " + member.name)
