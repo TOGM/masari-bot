@@ -189,10 +189,11 @@ See ya around!
 
 @bot.event
 async def on_member_join(member):
-	foundChannel = discord.utils.find(lambda m: str(m.id) == str(config.welcomeChannel), bot.get_all_channels())
-	welcomeMessage = "Welcome @" + member.name + "! What brings you to Masari?"
-	await bot.send_message(foundChannel, welcomeMessage)
 	await bot.send_message(member, newUserMessage)
+	if config.welcomeChannel is not "":
+		foundChannel = discord.utils.find(lambda m: str(m.id) == str(config.welcomeChannel), bot.get_all_channels())
+		welcomeMessage = "Welcome @" + member.name + "! What brings you to Masari?"
+		await bot.send_message(foundChannel, welcomeMessage)
 	print("Sent message to " + member.name)
 
 try:
