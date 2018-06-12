@@ -158,7 +158,7 @@ async def price_CMD(ctx):
 
 @bot.command(pass_context=True, brief="Network Stats", name='network')
 async def network_CMD(ctx):
-	
+	embed = getNetworkInfo()
 	await bot.say(embed=embed)
 
 @bot.command(pass_context=True, brief="Testcommand", name='test', hidden=True)
