@@ -77,11 +77,11 @@ def getExchangeInfo():
 	except (KeyError, ValueError):
 		BTC_MSR_sx = ' n/a '
 		
-	embed.add_field(name="SouthXchange", value="BTC: "+str(BTC_MSR_sx), inline=True)
+	embed.add_field(name="SouthXchange", value="[BTC: "+str(BTC_MSR_sx)+"](https://www.southxchange.com/Market/Book/MSR/BTC)", inline=True)
 	
 	#Stocks.Exchange
 	try:
-		stocksExchange = requests.get("https://stocks.exchange/api2/ticker").json()
+		stocksExchange = requests.get("https://app.stocks.exchange/api2/ticker").json()
 		for data in stocksExchange:
 			if data['market_name'] == "MSR_BTC":
 				BTC_MSR_stocks = data['last']
@@ -90,7 +90,7 @@ def getExchangeInfo():
 	except (KeyError, ValueError):
 		BTC_MSR_stocks = ' n/a '
 	
-	embed.add_field(name="Stocks.Exchange", value="BTC: "+str(BTC_MSR_stocks), inline=True)
+	embed.add_field(name="Stocks.Exchange", value="[BTC: "+str(BTC_MSR_stocks)+"](https://app.stocks.exchange/en/basic-trade/pair/BTC/MSR/)", inline=True)
 	
 	#TradeOgre
 	try:
@@ -100,7 +100,7 @@ def getExchangeInfo():
 	except (KeyError, ValueError):
 		BTC_MSR_to = ' n/a '
 	
-	embed.add_field(name="TradeOgre", value="BTC: "+str(BTC_MSR_to), inline=True)
+	embed.add_field(name="TradeOgre", value="[BTC: "+str(BTC_MSR_to)+"](https://tradeogre.com/exchange/BTC-MSR)", inline=True)
 	
 	#Altex.Exchange
 	try:
@@ -113,7 +113,27 @@ def getExchangeInfo():
 	except (KeyError, ValueError):
 		BTC_MSR_altex = ' n/a '
 	
-	embed.add_field(name="Altex.Exchange", value="BTC: "+str(BTC_MSR_altex), inline=True)
+	embed.add_field(name="Altex.Exchange", value="[BTC: "+str(BTC_MSR_altex)+"](https://altex.exchange/markets&pair=BTC_MSR)", inline=True)
+	
+	#Maple Change
+	try:
+		mapleChange = requests.get("https://maplechange.com/api/v2/tickers/msrbtc").json()
+		BTC_MSR_maple = format(float(mapleChange['ticker']['last']),'.8f')
+	except (KeyError, ValueError):
+		BTC_MSR_maple = ' n/a '
+	embed.add_field(name="Maple Change", value="[BTC: "+str(BTC_MSR_maple)+"](https://maplechange.com/markets/msrbtc)", inline=True)
+	
+	#Crex24
+	try:
+		crex24 = requests.get("https://api.crex24.com/v2/public/tickers").json()
+		for data in crex24:
+			if data["instrument"] == "MSR-BTC":
+				BTC_MSR_crex = format(float(data['last']),'.8f')
+	
+	except (KeyError, ValueError):
+		BTC_MSR_crex = ' n/a '
+	embed.add_field(name="Crex24", value="[BTC: "+str(BTC_MSR_crex)+"](https://crex24.com/exchange/MSR-BTC)", inline=True)
+	
 	return embed
 
 def getNetworkInfo():
